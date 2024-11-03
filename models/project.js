@@ -1,22 +1,31 @@
 import { toJSON } from "@reis/mongoose-to-json";
-import { Schema } from "mongoose";
+import { Schema, Types, model } from "mongoose";
 
 const projectSchema = new Schema({
     projectName: {
         type: String,
-        require: true
+        required: true
     },
+    
     projectBrief: {
         type: String,
-        require: true
+        required: true
     },
+
     projectAssignee: {
-        type: String,
-        require: true
+        type: Types.ObjectId,
+        required: true,
+        ref: 'User'
     },
+
+    projectRequirement: {
+        type: [String],
+        required: true
+    },
+
     projectStatus: {
         type: String,
-        require: true,
+        required: true,
         enum: ['Open', 'In Progress', 'Review', 'Completed', 'Closed']
     },
 }, {
