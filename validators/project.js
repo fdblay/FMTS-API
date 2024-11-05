@@ -5,7 +5,10 @@ export const createProjectValidator = Joi.object({
 
     projectBrief: Joi.string().required(),
 
-    projectRequirement: Joi.string().required()
+    projectRequirement: Joi.string().required(),
+
+    projectAssignee: Joi.string()
+
 })
 
 export const updateProjectStatusValidator = Joi.object({
@@ -14,5 +17,5 @@ export const updateProjectStatusValidator = Joi.object({
 })
 
 export const projectAssigneeValidator = Joi.object({
-    projectAssignee: objectId().required()
+    projectAssignee: Joi.string()
 })
