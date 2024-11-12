@@ -1,5 +1,5 @@
 import { ProjectModel } from "../models/project.js";
-import { createProjectValidator, updateProjectStatusValidator } from "../validators/project.js"
+import { createProjectValidator, projectAssigneeValidator, updateProjectStatusValidator } from "../validators/project.js"
 
 
 export const addProject = async (req, res, next) => {
@@ -23,9 +23,9 @@ export const addProject = async (req, res, next) => {
 
 export const getProject = async (req, res, next) => {
     try {
-        const { id } = req.params
+        const { id } = req.params.id
 
-        const project = await ProjectModel.findById(id);
+        const project = await ProjectModel.findById(id).populate('projectAssignee', 'fullName');
 
         res.status(200).json(project)
     } catch (error) {
@@ -36,7 +36,7 @@ export const getProject = async (req, res, next) => {
 export const getProjects = async (req, res, next) => {
     try {
         const {
-            filter = "{}", sort = "{}", limit = 0, skip = 0
+            filter = "{}", sort = "{}", limit = 10, skip = 0
         } = req.query;
 
         // Fetch Projects from database
@@ -44,7 +44,8 @@ export const getProjects = async (req, res, next) => {
             .find(JSON.parse(filter))
             .sort(JSON.parse(sort))
             .limit(limit)
-            .skip(skip);
+            .skip(skip)
+            .populate('projectAssignee', 'fullName');
 
         // Return response
         res.status(200).json(projects);
@@ -109,26 +110,26 @@ export const updateProjectStatus = async (req, res, next) => {
     }
 }
 
-// export const assignProjectTo = async (req, res, next) => {
-//     try {
-//         // const {id} = req.body;
-//         const { error, value } = projectAssigneeValidator.validate(req.body);
-//         if (error) {
-//             return res.status(422).json(error);
-//         }
+export const assignProjectTo = async (req, res, next) => {
+    try {
+        // const {id} = req.body;
+        const { error, value } = projectAssigneeValidator.validate(req.body);
+        if (error) {
+            return res.status(422).json(error);
+        }
 
-//         const project = await ProjectModel.findByIdAndUpdate(
-//             req.params.id,
-//             req.body,
-//             { new: true }
+        const project = await ProjectModel.findByIdAndUpdate(
+            req.params.id,
+            value,
+            { new: true }
 
-//         );
+        );
 
-//         if (!project) {
-//             return res.status(404).json({ message: 'Project not found' })
-//         }
-//         res.json(project);
-//     } catch (error) {
-//         next(error);
-//     }
-// }
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' })
+        }
+        res.json(project);
+    } catch (error) {
+        next(error);
+    }
+}

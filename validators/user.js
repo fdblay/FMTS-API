@@ -31,8 +31,8 @@ export const registerUserValidator = Joi.object({
     // .required(),
 
     role: Joi.string()
-    .valid('user', 'freelancer', 'manager', 'admin')
-    
+        .valid('user', 'freelancer', 'manager', 'admin')
+
 })
 
 // .with('password', 'repeat_password');
@@ -51,3 +51,12 @@ export const updateUserValidator = Joi.object({
     fullName: Joi.string(),
     avatar: Joi.string(),
 });
+
+export const passwordResetValidator = Joi.object({
+    password: Joi.string()
+        .required(),
+    repeat_password: Joi.any()
+        .valid(Joi.ref('password'))
+        .required()
+        .messages({ 'any.only': 'Passwords do not match' }),
+})

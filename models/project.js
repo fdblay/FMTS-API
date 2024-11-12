@@ -1,5 +1,5 @@
 import { toJSON } from "@reis/mongoose-to-json";
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
 const projectSchema = new Schema({
     projectName: {
@@ -12,12 +12,12 @@ const projectSchema = new Schema({
         required: true
     },
 
-    // projectAssignee: {
-    //     type: Types.ObjectId,
-    //     // required: true,
-    //     ref: 'User',
-    //     // default: null
-    // },
+    projectAssignee: {
+        type: Types.ObjectId,
+        // required: true,
+        ref: 'User',
+        default: null
+    },
 
     projectRequirement: {
         type: [String],

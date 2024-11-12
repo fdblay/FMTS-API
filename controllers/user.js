@@ -1,7 +1,7 @@
 import { BlacklistModel, UserModel } from "../models/user.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { loginUserValidator, registerUserValidator, updateUserValidator } from "../validators/user.js";
+import { loginUserValidator, passwordResetValidator, registerUserValidator, updateUserValidator } from "../validators/user.js";
 import { mailTransporter } from "../utils/mail.js";
 
 
@@ -31,7 +31,7 @@ export const registerUser = async (req, res, next) => {
         await mailTransporter.sendMail({
             to: value.email,
             subject: "User Registeration",
-            text: `Welcome! ${value.userName}, your account has been registered successfully.`
+            text: `Welcome! ${value.fullName}, your account has been registered successfully.`
         });
         // Respond to request
         res.json('User Registered!')
@@ -133,11 +133,74 @@ export const userLogout = async (req, res, next) => {
     }
 }
 
+// Password Reset
+export const reqPasswordReset = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        // Check if user exists by email
+        const user = await UserModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Generate a reset token
+        const resetToken = jwt.sign({ id: user._id }, process.env.JWT_PRIVATE_KEY, { expiresIn: '20m' });
+
+        // Send email with the reset link containing the token
+        await mailTransporter.sendMail({
+            to: user.email,
+            subject: "Password Reset",
+            text: `
+            Hello from Freelix!
+
+            Sorry about your password issue, help is here.
+            Please use the token below to reset your password.
+
+            ${resetToken}`
+        });
+
+        res.json({ message: 'Password reset email sent.' });
+
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const passwordReset = async (req, res, next) => {
+    try {
+        // const {token, newPassword} = req.body;
+        const token = req.headers.authorization.split(" ")[1];
+        const {error, value} = passwordResetValidator.validate(req.body)
+        if (error) {
+            return res.status(422).json(error);
+        }
+    
+        const decoded = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+        const user = await UserModel.findById(decoded.id);
+    
+        if (!user) {
+            return res.status(404).json({message: 'Invalid Token'})
+        }
+    
+        // Hash the new password
+        const hashedPassword = bcryptjs.hashSync(value.password, 10);
+    
+        // Update the password in the database
+        user.password = hashedPassword;
+        await user.save();
+    
+        res.json({message: 'Password reset successful'});
+    } catch (error) {
+        next(error);
+    }
+}
+
 // Remove expired Tokens from the database at intervals
 // const removeExpiredTokens = async () => {
 //     await BlacklistModel.deleteMany({ expiresAt: { $lt: new Date() } });
 
-//     // Run this at regualar intervals 
+//     // Run this at regualar intervals
 //     setInterval(removeExpiredTokens, 0.15 * 60 * 60 * 1000);
 // }
 // Delete Users

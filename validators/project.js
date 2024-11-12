@@ -13,7 +13,7 @@ export const createProjectValidator = Joi.object({
 
 export const updateProjectStatusValidator = Joi.object({
     projectStatus: Joi.string()
-    
+
 })
 
 export const projectAssigneeValidator = Joi.object({
