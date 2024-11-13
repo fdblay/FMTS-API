@@ -1,5 +1,4 @@
 import { toJSON } from "@reis/mongoose-to-json";
-import { required } from "joi";
 import { model, Schema, Types } from "mongoose";
 
 const proposalSchema = new Schema({
