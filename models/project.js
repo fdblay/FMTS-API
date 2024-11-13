@@ -14,9 +14,9 @@ const projectSchema = new Schema({
 
     projectAssignee: {
         type: Types.ObjectId,
-        // required: true,
-        ref: 'User',
-        default: null
+        required: true,
+        ref: 'User'
+        // default: null
     },
 
     projectRequirement: {

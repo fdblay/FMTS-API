@@ -3,6 +3,7 @@ import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { loginUserValidator, passwordResetValidator, registerUserValidator, updateUserValidator } from "../validators/user.js";
 import { mailTransporter } from "../utils/mail.js";
+import { ProjectModel } from "../models/project.js";
 
 
 // Register Users
@@ -90,6 +91,25 @@ export const getUserProfile = async (req, res, next) => {
 }
 
 // Get user projects
+export const getUserProjects = async (req, res, next) => {
+    try {
+        const { filter = "{}", sort = "{}", limit = 15, skip = 0 } = req.query
+
+        // user can seach by keyword. Yet to figure out how user can find by category.
+        const project = await ProjectModel
+        .find({
+            ...JSON.parse(filter),
+            projectAssignee: req.auth.id
+        })
+        .sort(JSON.parse(sort))
+        .limit(limit)
+        .skip(skip);
+
+        res.status(200).json(project);
+    } catch (error) {
+        next(error);
+    }
+}
 
 // Update User Profile
 export const updateUserProfile = async (req, res, next) => {

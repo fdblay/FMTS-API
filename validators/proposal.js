@@ -29,3 +29,23 @@ export const addProposalValidator = Joi.object({
         }).required()
     )
 })
+
+export const updateProposalValidator = Joi.object({
+    title: Joi.string(),
+
+    details: Joi.string(). required(),
+
+    createdBy: Joi.custom(isValidObjectId),
+
+    projectId: Joi.custom(isValidObjectId),
+
+    attachments: Joi.array().items(
+        Joi.object({
+            filename: Joi.string(),
+
+            url: Joi.string().url(),
+
+            uploadedAt: Joi.date().default(() => new Date(), 'current date')
+        })
+    )
+})
